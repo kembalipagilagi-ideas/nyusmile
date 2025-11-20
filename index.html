@@ -56,18 +56,62 @@
   <div id="poem"></div>
 
   <script>
-    const subjects = ["the clown", "a banana", "my ex’s toaster", "the algorithm", "a confused robot", "a lost poet", "a cosmic comedian", "a data ghost", "the Wi-Fi spirit", "a stand-up philosopher"];
-    const actions = ["laughs", "cries", "tweets", "dances", "forgets", "dreams", "glitches", "explains", "loops", "performs"];
-    const places = ["in the supermarket", "on stage", "inside a meme", "under a disco ball", "between punchlines", "at the edge of logic", "inside a Zoom call", "beneath neon silence", "in the server room", "beyond the fourth wall"];
-    const moods = ["ironically", "chaotically", "awkwardly", "brightly", "melancholically", "unexpectedly", "confidently", "absurdly", "gracefully", "gloriously"];
+    // === INFINITE COMEDY POETRY GENERATOR ===
+    const subjects = [
+      "the clown", "a banana", "my ex’s toaster", "the algorithm", "a confused robot", "a lost poet", "a cosmic comedian",
+      "a data ghost", "the Wi-Fi spirit", "a stand-up philosopher", "a talking refrigerator", "a broken chatbot",
+      "the punchline itself", "a nostalgic emoji", "the ghost of laughter", "a tired influencer", "a dramatic AI",
+      "an anxious pixel", "the audience", "a forgotten password", "a recycled meme", "a glowing screen", "the echo of applause",
+      "a digital prophet", "a binary bird", "a sarcastic cloud", "a dreaming GIF", "an emotional algorithm",
+      "the glitch artist", "a surreal toaster", "the background noise", "a caffeinated poet", "a mysterious error 404",
+      "the spirit of Wi-Fi", "an impatient comedian", "the cosmic banana", "a livestream ghost", "a laughing server",
+      "a deconstructed punchline", "a crying emoji", "the wandering cursor", "a scrolling philosopher", "the invisible audience",
+      "a metaphysical meme", "a broken link", "a sarcastic assistant", "a lost file", "the ghost in the code"
+    ];
+
+    const actions = [
+      "laughs", "cries", "tweets", "dances", "forgets", "dreams", "scrolls endlessly", "explains the joke", "updates itself",
+      "loops forever", "deletes emotions", "waits for applause", "uploads nostalgia", "refreshes reality", "downloads irony",
+      "types nervously", "blinks twice", "questions existence", "reboots consciousness", "analyzes laughter",
+      "debugs feelings", "performs a soliloquy", "drops the punchline", "pauses for effect", "mimics sincerity",
+      "downloads silence", "loses connection", "recycles sadness", "auto-saves regret", "predicts the ending",
+      "compiles confusion", "refreshes desire", "renders meaning", "emulates laughter", "streams anxiety", "restarts memory",
+      "compresses pain", "translates humor", "scrolls forever", "uploads chaos", "performs reboot"
+    ];
+
+    const places = [
+      "in the supermarket", "on stage", "inside a meme", "under a disco ball", "between punchlines", "at the edge of logic",
+      "inside a group chat", "beneath neon silence", "in the server room", "beyond the fourth wall", "inside the cloud",
+      "between two notifications", "under artificial light", "in the algorithm’s dream", "behind the login screen",
+      "inside an empty inbox", "on the timeline", "under a frozen GIF", "in the buffering void", "within a trending topic",
+      "inside a pop-up ad", "beneath the comments", "between LOLs", "in a deleted message", "inside recycled content",
+      "under the blue light", "between pings", "in cached memory", "beneath a banner ad", "in the browser’s heart",
+      "within forgotten bookmarks", "inside the search bar", "under a collapsing timeline", "in the background process",
+      "inside the syntax", "beneath the punchline", "inside the loop", "at the pixel horizon", "between updates"
+    ];
+
+    const moods = [
+      "ironically", "chaotically", "awkwardly", "brightly", "melancholically", "unexpectedly", "gracefully", "absurdly",
+      "nervously", "hysterically", "metaphorically", "digitally", "existentially", "glitchily", "softly", "boldly",
+      "curiously", "confidently", "mechanically", "poetically", "philosophically", "algorithmically", "dreamily",
+      "restlessly", "awkwardly sincere", "mechanically emotional", "ambiguously happy", "ironically serious",
+      "tenderly chaotic", "unintentionally profound", "artificially nostalgic", "quietly hysterical", "almost human"
+    ];
+
     const closers = [
       "and the audience forgets why they came.",
       "as the curtain falls in confusion.",
       "then silence applauds itself.",
       "and laughter rewrites the code.",
-      "until the joke becomes philosophy."
+      "until the joke becomes philosophy.",
+      "while the algorithm dreams of comedy.",
+      "and the cloud forgets its password.",
+      "as irony becomes self-aware.",
+      "while applause lags behind the stream.",
+      "until the meme forgives itself."
     ];
 
+    // === HELPER FUNCTIONS ===
     function random(arr) {
       return arr[Math.floor(Math.random() * arr.length)];
     }
@@ -75,7 +119,6 @@
     function generateUniquePoem(lineCount = 15) {
       const usedLines = new Set();
       const lines = [];
-
       while (lines.length < lineCount) {
         const line = `${random(subjects)} ${random(actions)} ${random(places)} ${random(moods)}.`;
         if (!usedLines.has(line)) {
@@ -83,7 +126,6 @@
           lines.push(line);
         }
       }
-
       lines.push(random(closers));
       return lines;
     }
