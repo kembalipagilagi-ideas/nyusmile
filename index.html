@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nyu's Infinite Comedy Poetry</title>
+  <meta name="description" content="An infinite generative comedy poem inspired by Taroko Gorge (2009). Each reload produces new verses, generated live with JavaScript.">
+  <meta name="keywords" content="generative poetry, Taroko Gorge, JavaScript poetry generator, comedy poem, code art">
+
+  <style>
+    body {
+      background: #fafafa;
+      font-family: "Georgia", serif;
+      color: #222;
+      padding: 40px;
+      line-height: 1.7;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 {
+      font-family: "Helvetica", sans-serif;
+      font-weight: 700;
+      color: #003366;
+      margin-bottom: 10px;
+    }
+    #poem {
+      white-space: pre-wrap;
+      animation: fadeIn 2s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>nyusmile</h1>
+  <div id="poem"></div>
+
+  <script>
+    const subjects = ["the clown", "a banana", "my ex’s toaster", "the algorithm", "a confused robot", "a lost poet"];
+    const actions = ["laughs", "cries", "tweets", "dances", "forgets", "dreams"];
+    const places = ["in the supermarket", "on stage", "inside a meme", "under a disco ball", "between punchlines", "at the edge of logic"];
+    const moods = ["ironically", "chaotically", "awkwardly", "brightly", "melancholically", "unexpectedly"];
+    const closers = [
+      "and the audience forgets why they came.",
+      "as the curtain falls in confusion.",
+      "then silence applauds itself.",
+      "and laughter rewrites the code.",
+      "until the joke becomes philosophy."
+    ];
+
+    function random(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function generatePoem() {
+      let poem = "";
+      for (let i = 0; i < 10; i++) {
+        poem += `${random(subjects)} ${random(actions)} ${random(places)} ${random(moods)}.\n`;
+      }
+      poem += "\n" + random(closers);
+      return poem;
+    }
+
+    document.getElementById("poem").innerText = generatePoem();
+  </script>
+</body>
+</html>
