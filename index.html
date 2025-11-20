@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nyu's Infinite Comedy Poetry</title>
-  <meta name="description" content="An infinite generative comedy poem inspired by Taroko Gorge (2009). Each reload produces new verses, generated live with JavaScript.">
-  <meta name="keywords" content="generative poetry, Taroko Gorge, JavaScript poetry generator, comedy poem, code art">
+  <title>Nyu’s Infinite Comedy Poetry</title>
 
   <style>
     body {
@@ -13,37 +11,55 @@
       font-family: "Georgia", serif;
       color: #222;
       padding: 40px;
-      line-height: 1.7;
+      line-height: 1.8;
       max-width: 700px;
       margin: auto;
     }
+
     h1 {
       font-family: "Helvetica", sans-serif;
       font-weight: 700;
       color: #003366;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
+
+    h2 {
+      font-weight: 400;
+      color: #555;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+
     #poem {
       white-space: pre-wrap;
-      animation: fadeIn 2s ease-in;
+      overflow: hidden;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+
+    .line {
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
 
 <body>
-  <h1>Nyu’s Infinite Comedy Poetry (311232011)</h1>
-  <h2><em>An infinite generative comedy poem inspired by Taroko Gorge (2009)</em></h2>
+  <h1>Nyu’s Infinite Comedy Poetry</h1>
+  <h2>An infinite generative comedy poem inspired by Taroko Gorge (2009)</h2>
   <div id="poem"></div>
 
   <script>
-    const subjects = ["the clown", "a banana", "my ex’s toaster", "the algorithm", "a confused robot", "a lost poet"];
-    const actions = ["laughs", "cries", "tweets", "dances", "forgets", "dreams"];
-    const places = ["in the supermarket", "on stage", "inside a meme", "under a disco ball", "between punchlines", "at the edge of logic"];
-    const moods = ["ironically", "chaotically", "awkwardly", "brightly", "melancholically", "unexpectedly"];
+    const subjects = ["the clown", "a banana", "my ex’s toaster", "the algorithm", "a confused robot", "a lost poet", "a cosmic comedian", "a data ghost", "the Wi-Fi spirit", "a stand-up philosopher"];
+    const actions = ["laughs", "cries", "tweets", "dances", "forgets", "dreams", "glitches", "explains", "loops", "performs"];
+    const places = ["in the supermarket", "on stage", "inside a meme", "under a disco ball", "between punchlines", "at the edge of logic", "inside a Zoom call", "beneath neon silence", "in the server room", "beyond the fourth wall"];
+    const moods = ["ironically", "chaotically", "awkwardly", "brightly", "melancholically", "unexpectedly", "confidently", "absurdly", "gracefully", "gloriously"];
     const closers = [
       "and the audience forgets why they came.",
       "as the curtain falls in confusion.",
@@ -56,16 +72,37 @@
       return arr[Math.floor(Math.random() * arr.length)];
     }
 
-    function generatePoem() {
-      let poem = "";
-      for (let i = 0; i < 10; i++) {
-        poem += `${random(subjects)} ${random(actions)} ${random(places)} ${random(moods)}.\n`;
+    function generateUniquePoem(lineCount = 15) {
+      const usedLines = new Set();
+      const lines = [];
+
+      while (lines.length < lineCount) {
+        const line = `${random(subjects)} ${random(actions)} ${random(places)} ${random(moods)}.`;
+        if (!usedLines.has(line)) {
+          usedLines.add(line);
+          lines.push(line);
+        }
       }
-      poem += "\n" + random(closers);
-      return poem;
+
+      lines.push(random(closers));
+      return lines;
     }
 
-    document.getElementById("poem").innerText = generatePoem();
+    function displayPoemAnimated() {
+      const poemContainer = document.getElementById("poem");
+      poemContainer.innerHTML = "";
+      const lines = generateUniquePoem();
+
+      lines.forEach((line, i) => {
+        const div = document.createElement("div");
+        div.className = "line";
+        div.style.animationDelay = `${i * 0.6}s`;
+        div.textContent = line;
+        poemContainer.appendChild(div);
+      });
+    }
+
+    displayPoemAnimated();
   </script>
 </body>
 </html>
