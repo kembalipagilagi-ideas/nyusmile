@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Infinite Comedy Poetry</title>
+  <style>
+    :root {
+      --bg: #0f1724;
+      --accent: #ffcc66;
+      --muted: #98a0b3;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(255,204,102,0.08), transparent 20%),
+                  radial-gradient(circle at 80% 80%, rgba(102,204,255,0.05), transparent 20%),
+                  var(--bg);
+      color: #e6eef8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .card {
+      max-width: 800px;
+      width: 100%;
+      background: rgba(255,255,255,0.02);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    }
+    h1 {
+      font-size: 22px;
+      margin: 0 0 8px 0;
+    }
+    .meta { color: var(--muted); font-size: 13px; }
+    pre.poem {
+      white-space: pre-wrap;
+      line-height: 1.5;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+    .controls { margin-top: 16px; display: flex; gap: 8px; align-items: center; }
+    button {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--accent);
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button.secondary { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Infinite Comedy Poetry</h1>
+    <div class="meta">
+      A generative comedy poem — new verses each time you load or press “Generate”.
+      Inspired by <em>Taroko Gorge (2009)</em>.
+    </div>
+
+    <pre id="poem" class="poem"></pre>
+
+    <div class="controls">
+      <button id="generate">Generate again</button>
+      <button id="mode" class="secondary">Change mode</button>
+      <div style="margin-left:auto" class="meta">Mode: <span id="modeName">standard</span></div>
+    </div>
+  </div>
+
+  <script>
+  // --- random helper ---
+  const pick = (arr, rng) => arr[Math.floor(rng() * arr.length)];
+
+  // Simple seeded RNG (xorshift)
+  function makeRNG(seed) {
+    let x = BigInt(seed) ^ 0x9e3779b97f4a7c15n;
+    return function() {
+      x ^= x << 13n;
+      x ^= x >> 7n;
+      x ^= x << 17n;
+      const mod = 2n ** 64n;
+      const val = Number((x & (mod - 1n)) % 1_000_000n) / 1_000_000;
+      return val;
+    };
+  }
+
+  // --- word banks ---
+  const subjects = [
+    "a confused toaster", "the invisible intern", "my neighbor’s goldfish",
+    "a tired philosopher", "the anxious banana", "an overconfident cloud",
+    "the algorithm", "a broken ukulele"
+  ];
+  const verbs = [
+    "writes", "argues with", "dances beside", "forgets", "explains",
+    "whispers to", "borrows", "investigates"
+  ];
+  const objects = [
+    "the cosmic spreadsheet", "a punchline with no joke",
+    "yesterday’s Wi-Fi", "a cup of imaginary coffee",
+    "the sound of typing", "its own reflection"
+  ];
+  const adjectives = [
+    "melancholy", "confused", "slightly radioactive",
+    "polite", "dramatic", "optimistic", "baffled"
+  ];
+  const intros = [
+    "At sunrise, somewhere between reason and breakfast,",
+    "During a meeting that never ended,",
+    "In a forgotten meme archive,",
+    "While the city rebooted itself,",
+    "Inside an unpaid internship of the universe,"
+  ];
+  const absurdities = [
+    "starts a podcast about silence",
+    "accidentally becomes a motivational poster",
+    "organizes a union for socks",
+    "tries stand-up comedy in Morse code",
+    "wins a staring contest with gravity",
+    "applies for a refund from destiny"
+  ];
+
+  const templates = [
+    rng => {
+      const intro = pick(intros, rng);
+      const subj = pick(subjects, rng);
+      const verb = pick(verbs, rng);
+      const obj = pick(objects, rng);
+      const adj = pick(adjectives, rng);
+      const absurd = pick(absurdities, rng);
+      return [
+        `${intro} ${subj} ${verb} ${obj}.`,
+        `It seems ${adj}, almost philosophical.`,
+        `Then ${subj} ${absurd}.`,
+        `The audience claps, but the Wi-Fi remains unimpressed.`
+      ];
+    },
+    rng => {
+      const subj = pick(subjects, rng);
+      const absurd = pick(absurdities, rng);
+      return [
+        `${subj} wakes up and ${absurd}.`,
+        `Someone writes this down in a serious academic paper.`,
+        `The conclusion: humor is an unpaid intern of chaos.`
+      ];
+    },
+    rng => {
+      const subj = pick(subjects, rng);
+      const verb = pick(verbs, rng);
+      const obj = pick(objects, rng);
+      return [
+        `Question: why does ${subj} ${verb} ${obj}?`,
+        `Answer: because the universe double-booked the script.`,
+        `Laughter echoes, confused but sincere.`
+      ];
+    }
+  ];
+
+  const modes = {
+    standard: { stanzas: 3 },
+    absurd: { stanzas: 4 },
+    brief: { stanzas: 2 }
+  };
+
+  let currentMode = "standard";
+
+  function generatePoem(modeName) {
+    const cfg = modes[modeName];
+    const seed = Date.now() + Math.floor(Math.random() * 1e6);
+    const rng = makeRNG(seed);
+    const lines = [];
+
+    for (let i = 0; i < cfg.stanzas; i++) {
+      const template = pick(templates, rng);
+      const stanza = template(rng);
+      lines.push(...stanza, ""); // blank line between stanzas
+    }
+    if (rng() < 0.6) {
+      lines.push("Final note: applause requested for the furniture that told a joke.");
+    }
+    return lines.join("\n");
+  }
+
+  const poemEl = document.getElementById("poem");
+  const generateBtn = document.getElementById("generate");
+  const modeBtn = document.getElementById("mode");
+  const modeNameEl = document.getElementById("modeName");
+
+  function render() {
+    const poem = generatePoem(currentMode);
+    poemEl.textContent = poem;
+    modeNameEl.textContent = currentMode;
+  }
+
+  generateBtn.onclick = render;
+  modeBtn.onclick = () => {
+    const keys = Object.keys(modes);
+    const i = keys.indexOf(currentMode);
+    currentMode = keys[(i + 1) % keys.length];
+    render();
+  };
+  window.addEventListener("keydown", e => {
+    if (e.key.toLowerCase() === "r") render();
+  });
+
+  // first run
+  render();
+  </script>
+</body>
+</html>
