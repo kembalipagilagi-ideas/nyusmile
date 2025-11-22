@@ -1,215 +1,156 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Infinite Comedy Poetry</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nyu’s Infinite Comedy Poetry</title>
+
   <style>
-    :root {
-      --bg: #0f1724;
-      --accent: #ffcc66;
-      --muted: #98a0b3;
-    }
+    /* === MOVING WAVE BACKGROUND === */
     body {
       margin: 0;
-      font-family: system-ui, "Segoe UI", Roboto, sans-serif;
-      background: radial-gradient(circle at 20% 20%, rgba(255,204,102,0.08), transparent 20%),
-                  radial-gradient(circle at 80% 80%, rgba(102,204,255,0.05), transparent 20%),
-                  var(--bg);
-      color: #e6eef8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 24px;
+      background: #fafafa;
+      overflow-x: hidden;
+      overflow-y: auto;
+      font-family: "Georgia", serif;
+      color: #222;
+      line-height: 1.8;
+      padding: 40px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
     }
-    .card {
-      max-width: 800px;
-      width: 100%;
-      background: rgba(255,255,255,0.02);
-      border-radius: 16px;
-      padding: 24px;
-      border: 1px solid rgba(255,255,255,0.05);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+
+    .waves {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 200%;
+      height: 200px;
+      background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg"><path fill="%23003366" fill-opacity="0.25" d="M0,64L48,85.3C96,107,192,149,288,149.3C384,149,480,107,576,106.7C672,107,768,149,864,170.7C960,192,1056,192,1152,202.7C1248,213,1344,235,1392,245.3L1440,256L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+      background-size: cover;
+      animation: waveMove 12s linear infinite;
+      z-index: -1;
+      opacity: 0.8;
     }
+
+    @keyframes waveMove {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
     h1 {
-      font-size: 22px;
-      margin: 0 0 8px 0;
+      font-family: "Helvetica", sans-serif;
+      font-weight: 700;
+      color: #003366;
+      margin-bottom: 5px;
     }
-    .meta { color: var(--muted); font-size: 13px; }
-    pre.poem {
+
+    h2 {
+      font-weight: 400;
+      color: #555;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+
+    #poem {
       white-space: pre-wrap;
-      line-height: 1.5;
-      font-size: 18px;
-      margin-top: 20px;
+      overflow: hidden;
+      position: relative;
     }
-    .controls { margin-top: 16px; display: flex; gap: 8px; align-items: center; }
-    button {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.2);
-      color: var(--accent);
-      padding: 8px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
+
+    .line {
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeInUp 0.6s ease forwards;
     }
-    button.secondary { color: var(--muted); }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
+
 <body>
-  <div class="card">
-    <h1>Infinite Comedy Poetry</h1>
-    <div class="meta">
-      A generative comedy poem — new verses each time you load or press “Generate”.
-      Inspired by <em>Taroko Gorge (2009)</em>.
-    </div>
+  <div class="waves"></div>
 
-    <pre id="poem" class="poem"></pre>
-
-    <div class="controls">
-      <button id="generate">Generate again</button>
-      <button id="mode" class="secondary">Change mode</button>
-      <div style="margin-left:auto" class="meta">Mode: <span id="modeName">standard</span></div>
-    </div>
-  </div>
+  <h1>Nyu’s Infinite Comedy Poetry</h1>
+  <h2>An infinite generative comedy poem inspired by Taroko Gorge (2009)</h2>
+  <div id="poem"></div>
 
   <script>
-  // --- random helper ---
-  const pick = (arr, rng) => arr[Math.floor(rng() * arr.length)];
-
-  // Simple seeded RNG (xorshift)
-  function makeRNG(seed) {
-    let x = BigInt(seed) ^ 0x9e3779b97f4a7c15n;
-    return function() {
-      x ^= x << 13n;
-      x ^= x >> 7n;
-      x ^= x << 17n;
-      const mod = 2n ** 64n;
-      const val = Number((x & (mod - 1n)) % 1_000_000n) / 1_000_000;
-      return val;
-    };
-  }
-
-  // --- word banks ---
+  /* === INFINITE COMEDY POETRY GENERATOR === */
   const subjects = [
-    "a confused toaster", "the invisible intern", "my neighbor’s goldfish",
-    "a tired philosopher", "the anxious banana", "an overconfident cloud",
-    "the algorithm", "a broken ukulele"
-  ];
-  const verbs = [
-    "writes", "argues with", "dances beside", "forgets", "explains",
-    "whispers to", "borrows", "investigates"
-  ];
-  const objects = [
-    "the cosmic spreadsheet", "a punchline with no joke",
-    "yesterday’s Wi-Fi", "a cup of imaginary coffee",
-    "the sound of typing", "its own reflection"
-  ];
-  const adjectives = [
-    "melancholy", "confused", "slightly radioactive",
-    "polite", "dramatic", "optimistic", "baffled"
-  ];
-  const intros = [
-    "At sunrise, somewhere between reason and breakfast,",
-    "During a meeting that never ended,",
-    "In a forgotten meme archive,",
-    "While the city rebooted itself,",
-    "Inside an unpaid internship of the universe,"
-  ];
-  const absurdities = [
-    "starts a podcast about silence",
-    "accidentally becomes a motivational poster",
-    "organizes a union for socks",
-    "tries stand-up comedy in Morse code",
-    "wins a staring contest with gravity",
-    "applies for a refund from destiny"
+    "the clown", "a banana", "my ex’s toaster", "the algorithm", "a confused robot", "a lost poet",
+    "a cosmic comedian", "a data ghost", "the Wi-Fi spirit", "a stand-up philosopher",
+    "a talking refrigerator", "a broken chatbot", "the punchline itself", "a nostalgic emoji",
+    "the ghost of laughter", "a tired influencer", "a dramatic AI", "an anxious pixel",
+    "the audience", "a forgotten password", "a recycled meme", "a glowing screen",
+    "the echo of applause", "a digital prophet", "a binary bird", "a sarcastic cloud",
+    "a dreaming GIF", "an emotional algorithm", "the glitch artist", "a surreal toaster",
+    "the background noise", "a caffeinated poet", "a mysterious error 404"
   ];
 
-  const templates = [
-    rng => {
-      const intro = pick(intros, rng);
-      const subj = pick(subjects, rng);
-      const verb = pick(verbs, rng);
-      const obj = pick(objects, rng);
-      const adj = pick(adjectives, rng);
-      const absurd = pick(absurdities, rng);
-      return [
-        `${intro} ${subj} ${verb} ${obj}.`,
-        `It seems ${adj}, almost philosophical.`,
-        `Then ${subj} ${absurd}.`,
-        `The audience claps, but the Wi-Fi remains unimpressed.`
-      ];
-    },
-    rng => {
-      const subj = pick(subjects, rng);
-      const absurd = pick(absurdities, rng);
-      return [
-        `${subj} wakes up and ${absurd}.`,
-        `Someone writes this down in a serious academic paper.`,
-        `The conclusion: humor is an unpaid intern of chaos.`
-      ];
-    },
-    rng => {
-      const subj = pick(subjects, rng);
-      const verb = pick(verbs, rng);
-      const obj = pick(objects, rng);
-      return [
-        `Question: why does ${subj} ${verb} ${obj}?`,
-        `Answer: because the universe double-booked the script.`,
-        `Laughter echoes, confused but sincere.`
-      ];
-    }
+  const actions = [
+    "laughs", "cries", "tweets", "dances", "forgets", "dreams", "scrolls endlessly", "explains the joke",
+    "updates itself", "loops forever", "deletes emotions", "waits for applause", "uploads nostalgia",
+    "refreshes reality", "downloads irony", "types nervously", "questions existence", "reboots consciousness",
+    "analyzes laughter", "debugs feelings", "drops the punchline", "pauses for effect", "mimics sincerity"
   ];
 
-  const modes = {
-    standard: { stanzas: 3 },
-    absurd: { stanzas: 4 },
-    brief: { stanzas: 2 }
-  };
+  const places = [
+    "in the supermarket", "on stage", "inside a meme", "under a disco ball", "between punchlines",
+    "at the edge of logic", "inside a group chat", "beneath neon silence", "in the server room",
+    "beyond the fourth wall", "inside the cloud", "between notifications"
+  ];
 
-  let currentMode = "standard";
+  const moods = [
+    "ironically", "chaotically", "awkwardly", "melancholically", "unexpectedly", "gracefully",
+    "absurdly", "digitally", "existentially", "glitchily", "softly", "boldly", "curiously"
+  ];
 
-  function generatePoem(modeName) {
-    const cfg = modes[modeName];
-    const seed = Date.now() + Math.floor(Math.random() * 1e6);
-    const rng = makeRNG(seed);
+  const closers = [
+    "and the audience forgets why they came.",
+    "then silence applauds itself.",
+    "until the joke becomes philosophy.",
+    "while the algorithm dreams of comedy."
+  ];
+
+  function random(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function generateUniquePoem(lineCount = 15) {
+    const used = new Set();
     const lines = [];
-
-    for (let i = 0; i < cfg.stanzas; i++) {
-      const template = pick(templates, rng);
-      const stanza = template(rng);
-      lines.push(...stanza, ""); // blank line between stanzas
+    while (lines.length < lineCount) {
+      const line = `${random(subjects)} ${random(actions)} ${random(places)} ${random(moods)}.`;
+      if (!used.has(line)) {
+        used.add(line);
+        lines.push(line);
+      }
     }
-    if (rng() < 0.6) {
-      lines.push("Final note: applause requested for the furniture that told a joke.");
-    }
-    return lines.join("\n");
+    lines.push(random(closers));
+    return lines;
   }
 
-  const poemEl = document.getElementById("poem");
-  const generateBtn = document.getElementById("generate");
-  const modeBtn = document.getElementById("mode");
-  const modeNameEl = document.getElementById("modeName");
-
-  function render() {
-    const poem = generatePoem(currentMode);
-    poemEl.textContent = poem;
-    modeNameEl.textContent = currentMode;
+  function displayPoemAnimated() {
+    const container = document.getElementById("poem");
+    container.innerHTML = "";
+    const lines = generateUniquePoem();
+    lines.forEach((line, i) => {
+      const div = document.createElement("div");
+      div.className = "line";
+      div.style.animationDelay = `${i * 0.6}s`;
+      div.textContent = line;
+      container.appendChild(div);
+    });
   }
 
-  generateBtn.onclick = render;
-  modeBtn.onclick = () => {
-    const keys = Object.keys(modes);
-    const i = keys.indexOf(currentMode);
-    currentMode = keys[(i + 1) % keys.length];
-    render();
-  };
-  window.addEventListener("keydown", e => {
-    if (e.key.toLowerCase() === "r") render();
-  });
-
-  // first run
-  render();
+  displayPoemAnimated();
   </script>
 </body>
 </html>
